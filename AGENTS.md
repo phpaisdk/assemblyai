@@ -8,10 +8,11 @@ Official AssemblyAI provider for the PHP AI SDK. Part of the framework-agnostic 
 use AiSdk\AssemblyAI;
 use AiSdk\Content;
 use AiSdk\Generate;
+use AiSdk\LocalFile;
 
 AssemblyAI::create(['apiKey' => '...']); // optional: environment variables below are read automatically
 
-$result = Generate::transcription(Content::audio('/path/to/audio.mp3'))
+$result = Generate::transcription(Content::audio(LocalFile::at('/path/to/audio.mp3')))
     ->model(AssemblyAI::model('model-id'))
     ->run();
 
