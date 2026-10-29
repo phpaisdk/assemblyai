@@ -8,6 +8,7 @@ use AiSdk\AssemblyAI\AssemblyAIOptions;
 use AiSdk\ContentSource;
 use AiSdk\Contracts\BaseModel;
 use AiSdk\Contracts\TranscriptionModelInterface;
+use AiSdk\Exceptions\InvalidResponseException;
 use AiSdk\Requests\TranscriptionRequest;
 use AiSdk\Responses\TranscriptionResponse;
 use AiSdk\Results\TranscriptData;
@@ -43,7 +44,7 @@ final class AssemblyAITranscriptionModel extends BaseModel implements Transcript
             } $payload = $runner->getJson(Url::joinPath($this->options->baseUrl, '/v2/transcript/' . rawurlencode($id)), $this->options->authHeaders(), $this->provider());
         } while (($payload['status'] ?? '') === 'queued' || ($payload['status'] ?? '') === 'processing');
         if (($payload['status'] ?? '') === 'error') {
-            throw new \RuntimeException('AssemblyAI transcription failed: ' . (string) ($payload['error'] ?? 'unknown error'));
+            throw new InvalidResponseException('AssemblyAI transcription failed: ' . (string) ($payload['error'] ?? 'unknown error'));
         } $segments = [];
         foreach ((array) ($payload['words'] ?? []) as $word) {
             if (is_array($word)) {
