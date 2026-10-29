@@ -2,6 +2,11 @@
 
 Notable changes to `aisdk/assemblyai`. Release notes are also published at https://github.com/phpaisdk/assemblyai/releases.
 
+## Unreleased (v0.10.1)
+
+- Polling has a 15 minute limit and incomplete transcripts raise typed exceptions.
+- Raise SDK exceptions instead of native PHP ones.
+
 ## v0.10.0 — 2026-10-29
 
 ### What's new
