@@ -37,14 +37,24 @@ final class AssemblyAITranscriptionModel extends BaseModel implements Transcript
             $payload = json_decode($audioUrl, true);
             $audioUrl = is_array($payload) ? (string) ($payload['upload_url'] ?? '') : '';
         } $submitted = $runner->postJson(Url::joinPath($this->options->baseUrl, '/v2/transcript'), array_replace(['audio_url' => $audioUrl, 'speech_models' => [$this->modelId]], $request->providerOptionsFor($this->provider())), $this->options->authHeaders(), $this->provider());
-        $id = (string) ($submitted['id'] ?? '');
+        $id = is_string($submitted['id'] ?? null) ? $submitted['id'] : '';
+        if ($id === '') {
+            throw new InvalidResponseException('AssemblyAI did not return a transcript id.');
+        }
+        $deadline = time() + 900;
         do {
             if ($this->options->pollingIntervalMs > 0) {
                 usleep($this->options->pollingIntervalMs * 1000);
             } $payload = $runner->getJson(Url::joinPath($this->options->baseUrl, '/v2/transcript/' . rawurlencode($id)), $this->options->authHeaders(), $this->provider());
+            if (time() > $deadline) {
+                throw new \AiSdk\Exceptions\TimeoutException('AssemblyAI transcription did not finish within 15 minutes.', ['provider' => 'assemblyai', 'transcriptId' => $id]);
+            }
         } while (($payload['status'] ?? '') === 'queued' || ($payload['status'] ?? '') === 'processing');
         if (($payload['status'] ?? '') === 'error') {
-            throw new InvalidResponseException('AssemblyAI transcription failed: ' . (string) ($payload['error'] ?? 'unknown error'));
+            throw new InvalidResponseException('AssemblyAI transcription failed: ' . (is_string($payload['error'] ?? null) ? $payload['error'] : 'unknown error'));
+        }
+        if (! is_string($payload['text'] ?? null)) {
+            throw new InvalidResponseException('AssemblyAI returned a transcript without text.');
         } $segments = [];
         foreach ((array) ($payload['words'] ?? []) as $word) {
             if (is_array($word)) {
