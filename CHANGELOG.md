@@ -2,6 +2,10 @@
 
 Notable changes to `aisdk/assemblyai`. Release notes are also published at https://github.com/phpaisdk/assemblyai/releases.
 
+## v0.11.0 — 2026-10-31
+
+- Requires `aisdk/core ^0.11.0`. Upgrade SDK packages together; no other changes in this package.
+
 ## v0.10.1 — 2026-10-29
 
 - Polling has a 15 minute limit and incomplete transcripts raise typed exceptions.
